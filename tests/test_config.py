@@ -59,6 +59,12 @@ def test_latex_packages_str():
     assert result == "\\usepackage{amsmath}\n\\usepackage{amssymb}"
 
 
+def test_latex_packages_str_empty():
+    """latex_packages_str() should return an empty string when no packages are set."""
+    cfg = Config(latex_packages=[])
+    assert cfg.latex_packages_str() == ""
+
+
 # ---------------------------------------------------------------------------
 # /config route tests
 # ---------------------------------------------------------------------------
@@ -99,3 +105,9 @@ def test_config_route_values(client):
     assert data["server"]["port"] == 5000
     assert data["cache"]["max_entries"] == 128
     assert "amsmath" in data["latex"]["packages"]
+
+
+def test_config_route_content_type(client):
+    """The /config endpoint should respond with JSON content type."""
+    resp = client.get("/config")
+    assert resp.content_type == "application/json"
