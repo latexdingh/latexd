@@ -85,3 +85,17 @@ def test_updated_at_changes_on_update(queue):
     time.sleep(0.01)
     queue.update(job.job_id, JobStatus.RUNNING)
     assert queue.get(job.job_id).updated_at > original_ts
+
+
+def test_create_job_ids_are_unique(queue):
+    """Each created job should receive a distinct job_id."""
+    ids = {queue.create("x", "svg").job_id for _ in range(10)}
+    assert len(ids) == 10
+
+
+def test_all_jobs_reflects_status_updates(queue):
+    """all_jobs() should return the current state after a status update."""
+    job = queue.create("i", "svg")
+    queue.update(job.job_id, JobStatus.DONE, result=b"<svg/>")
+    jobs_by_id = {j["job_id"]: j for j in queue.all_jobs()}
+    assert jobs_by_id[job.job_id]["status"] == JobStatus.DONE.value
