@@ -72,6 +72,17 @@ def test_to_dict_keys(store):
     assert {"format", "size_bytes", "created_at", "hit_count"} == set(d.keys())
 
 
+def test_put_same_key_overwrites(store):
+    """Putting the same snippet/format twice should overwrite the entry."""
+    store.put("\\delta", "svg", b"<svg>old</svg>")
+    store.put("\\delta", "svg", b"<svg>new</svg>")
+    entry = store.get("\\delta", "svg")
+    assert entry is not None
+    assert entry.data == b"<svg>new</svg>"
+    # Overwriting should not inflate the entry count
+    assert store.stats()["entries"] == 1
+
+
 # --- Route tests ---
 
 def test_stats_empty(client):
