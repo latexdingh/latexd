@@ -39,6 +39,16 @@ class MetricsStore:
             return 0.0
         return sum(self.latencies_ms) / len(self.latencies_ms)
 
+    def p95_latency_ms(self) -> float:
+        """Return the 95th percentile latency in milliseconds, or 0.0 if no data."""
+        if not self.latencies_ms:
+            return 0.0
+        sorted_latencies = sorted(self.latencies_ms)
+        index = int(len(sorted_latencies) * 0.95)
+        # Clamp to the last valid index
+        index = min(index, len(sorted_latencies) - 1)
+        return sorted_latencies[index]
+
     def uptime_seconds(self) -> float:
         return time.time() - self.started_at
 
@@ -51,6 +61,7 @@ class MetricsStore:
             "cache_misses": self.cache_misses,
             "format_counts": dict(self.format_counts),
             "avg_latency_ms": round(self.avg_latency_ms(), 3),
+            "p95_latency_ms": round(self.p95_latency_ms(), 3),
             "uptime_seconds": round(self.uptime_seconds(), 2),
         }
 
